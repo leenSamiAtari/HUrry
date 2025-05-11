@@ -23,7 +23,7 @@ const ReportMissingOD = ({ navigation }) => {
       //const storedToken = await SecureStore.getItemAsync('userToken');
       //setToken(storedToken);
 
-      const response = await fetch(`${API_URL}/api/items`,{
+      const response = await fetch(`${API_URL}/report-missing/create`,{
        // headers: {
         //  'Authorization' : `Bearer ${token}`
        // }
@@ -282,7 +282,7 @@ const ReportMissingOD = ({ navigation }) => {
                   </View>
 
                   {/* Photos */}
-                  {selectedItem.photos && selectedItem.photos.length > 0 ? (
+                  {selectedItem.photoUrls && selectedItem.photoUrls.length > 0 ? (
                     <View style={styles.photoSection}>
                       <Text style={styles.sectionTitle}>Photos:</Text>
                       <ScrollView horizontal>

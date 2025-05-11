@@ -4,7 +4,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from '@react-navigation/native';
 import * as SecureStore from 'expo-secure-store';
 
-const API_URL = "https://your-ngrok-url.ngrok.io";
+const API_URL = "https://9557-91-186-250-146.ngrok-free.app";
 
 const SignIn = ({ navigation }) => {
   const [email, setEmail] = useState("");

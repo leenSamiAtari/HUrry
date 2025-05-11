@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View,TouchableOpacity, Text,ImageBackground, TextInput, Button, StyleSheet,Alert, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform, ScrollView } from "react-native";
 import { MaterialIcons, FontAwesome, Ionicons } from "@expo/vector-icons";
 
-const API_URL = "https://your-ngrok-url.ngrok.io";
+const API_URL = "https://9557-91-186-250-146.ngrok-free.app";
 
 const SignUp = ({ route, navigation }) => {
   const { role } = route.params; // Role passed from the welcome page

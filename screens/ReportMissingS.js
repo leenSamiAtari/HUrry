@@ -7,7 +7,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as SecureStore from 'expo-secure-store';
 
-const API_URL = "https://7167-109-107-251-204.ngrok-free.app";
+const API_URL = "https://9557-91-186-250-146.ngrok-free.app";
 
 
 const ReportMissingS = ({ navigation, route }) => {
@@ -44,12 +44,12 @@ const ReportMissingS = ({ navigation, route }) => {
     const fetchReports = async () => {
       setIsLoading(true);
       try {
-        //const token = await SecureStore.getItemAsync('userToken');
-        const response = await fetch(`${API_URL}/report-missing`//,{
-          //headers: {
-           // 'Authorization' : `Bearer ${token}`
-          //}
-       // }
+        const token = await SecureStore.getItemAsync('userToken');
+        const response = await fetch(`${API_URL}/report-missing/create`,{
+          headers: {
+           'Authorization' : `Bearer ${token}`
+          }
+        }
       );
         const data = await response.json();
         const convertedData = data.map(item => ({
@@ -142,15 +142,15 @@ const ReportMissingS = ({ navigation, route }) => {
   const handleDeleteReport = async (index) => {
     const id = reports[index].id;
     try {
-      //const token = await SecureStore.getItemAsync('userToken');
+      const token = await SecureStore.getItemAsync('userToken');
 
-      const response = await fetch(`${API_URL}/report-missing/${id}`, {
+      const response = await fetch(`${API_URL}/report-missing/create/${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          //'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ id: reportId }),
+        body: JSON.stringify({ id: id }),
       });
       
       if (!response.ok) throw new Error('Failed to delete report');
@@ -189,80 +189,139 @@ const ReportMissingS = ({ navigation, route }) => {
     return true;
   };
 
-  const handlePhotoUpload = async () => {
-    try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission required', 'Please enable photo library access in settings');
-        return;
-      }
-  
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: "Images",
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0.8,
-        base64: true
-      });
-   console.log("ImagePicker Result:", result);
 
+  const uploadImage = async (imageSource) => {
+  try {
+    let fileType = 'image/jpeg'; 
+    let formData = new FormData();
+    
+    if (fileType === 'image/png') {
+      fileName = `photo_${Date.now()}.png`;
+    } else if (fileType === 'image/gif') {
+      fileName = `photo_${Date.now()}.gif`;
+    }
+    formData.append('file', { 
+      uri: imageSource,
+      name: `photo_${Date.now()}.${fileType.split('/')[1]}`, 
+      type: fileType,
+    });
+
+    
+    const uploadResponse = await fetch(`${API_URL}/report-missing/create`, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data', 
+      },
+    });
+
+    if (!uploadResponse.ok) {
+      const errorData = await uploadResponse.json();
+      console.error('Image upload failed:', errorData);
+      Alert.alert('Error', 'Failed to upload image.');
+      return null; 
+    }
+
+    const uploadResult = await uploadResponse.json();
+    console.log('Image upload successful:', uploadResult);
+
+    return uploadResult.url;
+  } catch (error) {
+    console.error('Image upload error:', error);
+    Alert.alert('Error', 'Failed to upload image.');
+    return null;
+  }
+};
+
+  const handlePhotoUpload = async () => {
+  try {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission required', 'Please enable photo library access in settings');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: "Images",
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+    });
+    console.log("ImagePicker Result:", result);
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
       const selectedAsset = result.assets[0];
-      let imageSource;
+      const imageUri = selectedAsset.uri;
 
-      if (selectedAsset.base64) {
-        imageSource = `data:${selectedAsset.mimeType};base64,${selectedAsset.base64}`;
-      } else if (selectedAsset.uri) {
-        imageSource = selectedAsset.uri;
-        // You might need to handle the 'uri' differently based on your use case.
-        // For displaying in an <Image> component, the uri will work directly.
-        // If you need base64 for API upload, you might need to fetch it separately.
-        // (Be cautious about fetching base64 of large images as it can be memory-intensive).
+      if (imageUri) {
+        setIsLoading(true); 
+        const imageUrl = await uploadImage(imageUri);
+        setIsLoading(false);
+
+        if (imageUrl) {
+          setCurrentReport(prev => ({
+            ...prev,
+            photos: [...prev.photos, imageUrl], 
+          }));
+        }
       }
-
-      if (imageSource) {
-        setCurrentReport(prev => ({
-          ...prev,
-          photos: [...prev.photos, imageSource] // Update your photos array with the image source
-        }));
-      } 
     }
   } catch (error) {
     Alert.alert('Error', 'Failed to select image');
     console.error("ImagePicker Error:", error);
+  } finally {
+    setIsLoading(false);
   }
- };
+};
 
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
     setIsLoading(true);
     try {
-     // const token = await SecureStore.getItemAsync('userToken');
+      const token = await SecureStore.getItemAsync('userToken');
       const method = currentReport.isEditing ? 'PUT' : 'POST';
       const url = currentReport.isEditing 
-        ? `${API_URL}/report-missing/${currentReport.id}`
+        ? `${API_URL}/report-missing/create/${currentReport.id}`
         : `${API_URL}/report-missing/create`;
+
+        const payload = {
+      category: currentReport.category,
+      description: currentReport.description,
+      brand: currentReport.brand,
+      model: currentReport.model,
+      containsItems: currentReport.containsItems,
+      itemsInside: currentReport.itemsInside,
+      uniqueFeatures: currentReport.uniqueFeatures,
+      dateLost: currentReport.dateLost.toISOString(),
+      timeApproximate: currentReport.timeApproximate.toISOString(),
+      locationType: currentReport.locationType,
+      station: currentReport.station,
+      busNumber: currentReport.busNumber,
+      photoUrls: currentReport.photos, 
+      status: currentReport.status,
+      name: currentReport.name,
+      email: currentReport.email,
+      dateSubmitted: currentReport.dateSubmitted.toISOString(),
+      phoneNumber: currentReport.phoneNumber,
+      sharePhone: currentReport.sharePhone,
+      ...(currentReport.isEditing && { id: currentReport.id }), // Include id for editing
+    };
+    console.log("Submitting payload:", JSON.stringify(payload));
 
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
-          //'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          currentReport,
-          dateLost: currentReport.dateLost.toISOString(),
-          timeApproximate: currentReport.timeApproximate.toISOString(),
-          dateSubmitted: currentReport.dateSubmitted.toISOString()
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) throw new Error('Failed to save report');
 
       // Refresh reports after submission
-      const updatedReports = await fetch(`${API_URL}/report-missing`).then(res => res.json());
+      const updatedReports = await fetch(`${API_URL}/report-missing/create`).then(res => res.json());
       setReports(updatedReports);
       
       setShowForm(false);
@@ -277,12 +336,12 @@ const ReportMissingS = ({ navigation, route }) => {
   const handleMarkAsFound = async (index) => {
     const id = reports[index].id;
     try {
-     // const token = await SecureStore.getItemAsync('userToken');
-      const response = await fetch(`${API_URL}/report-missing/${id}`, {
+      const token = await SecureStore.getItemAsync('userToken');
+      const response = await fetch(`${API_URL}/report-missing/create/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          //'Authorization': `Bearer ${token}` 
+          'Authorization': `Bearer ${token}`
       },
         body: JSON.stringify({ status: 'found' }),
       });
