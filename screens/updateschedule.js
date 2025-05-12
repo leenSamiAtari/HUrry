@@ -314,7 +314,7 @@ return (
 
     {/* Bottom Navigation */}
     <View style={styles.bottomNav}>
-      <TouchableOpacity onPress={() => navigation.navigate("opertor",{role:'OPERATOR'})} style={styles.navItem}>
+      <TouchableOpacity onPress={() => navigation.navigate("Home",{role:'OPERATOR'})} style={styles.navItem}>
         <Icon name="home-outline" size={25} color="#59B3F8" />
         <Text style={styles.navText}>Home</Text>
       </TouchableOpacity>
@@ -326,7 +326,7 @@ return (
         <Icon name="comment-outline" size={25} color="#59B3F8" />
         <Text style={styles.navText}>Feedback</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate("ContactUs",{role:'OPERATOR'})} style={styles.navItem}>
+      <TouchableOpacity onPress={() => navigation.navigate(role === "OPERATOR" ? 'ReportMissingOD' : 'ReportMissingS')} style={styles.navItem}>
         <Icon name="alert-circle-outline" size={25} color="#59B3F8" />
         <Text style={styles.navText}>Missing</Text>
       </TouchableOpacity>

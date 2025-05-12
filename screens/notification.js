@@ -353,7 +353,7 @@ const notification = ({ route, navigation }) => {
         </ScrollView>
             {/* Bottom Navigation */}
             <View style={styles.bottomNav}>
-                    <TouchableOpacity onPress={() => navigation.navigate("oprator", { userRole })} style={styles.navItem}>
+                    <TouchableOpacity onPress={() => navigation.navigate("Home", { role })} style={styles.navItem}>
                       <Icon name="home-outline" size={25} color="#59B3F8" />
                       <Text style={styles.navText}>Home</Text>
                     </TouchableOpacity>
@@ -365,7 +365,7 @@ const notification = ({ route, navigation }) => {
                       <Icon name="comment-outline" size={25} color="#59B3F8" />
                       <Text style={styles.navText}>Feedback</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => navigation.navigate("ContactUs",{userRole})} style={styles.navItem}>
+                    <TouchableOpacity onPress={() => navigation.navigate(role === "OPERATOR" ? 'ReportMissingOD' : 'ReportMissingS')} style={styles.navItem}>
                       <Icon name="alert-circle-outline" size={25} color="#59B3F8" />
                       <Text style={styles.navText}>Missing</Text>
                     </TouchableOpacity>

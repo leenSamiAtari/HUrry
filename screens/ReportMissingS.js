@@ -253,19 +253,16 @@ const ReportMissingS = ({ navigation, route }) => {
       const selectedAsset = result.assets[0];
       const imageUri = selectedAsset.uri;
 
-      if (imageUri) {
-        setIsLoading(true); 
-        const imageUrl = await uploadImage(imageUri);
-        setIsLoading(false);
+     
 
-        if (imageUrl) {
+        if (imageUri) {
           setCurrentReport(prev => ({
             ...prev,
-            photos: [...prev.photos, imageUrl], 
+            photos: [...prev.photos, imageUri], 
           }));
         }
-      }
     }
+    
   } catch (error) {
     Alert.alert('Error', 'Failed to select image');
     console.error("ImagePicker Error:", error);
@@ -285,6 +282,18 @@ const ReportMissingS = ({ navigation, route }) => {
         ? `${API_URL}/report-missing/create/${currentReport.id}`
         : `${API_URL}/report-missing/create`;
 
+        const uploadedImageUrls = [];
+    for (const localUri of currentReport.photos) {
+      const imageUrl = await uploadImage(localUri); // Now call uploadImage here
+      if (imageUrl) {
+        uploadedImageUrls.push(imageUrl);
+      } else {
+        Alert.alert('Error', 'Failed to upload one or more images. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+    }
+
         const payload = {
       category: currentReport.category,
       description: currentReport.description,
@@ -298,7 +307,7 @@ const ReportMissingS = ({ navigation, route }) => {
       locationType: currentReport.locationType,
       station: currentReport.station,
       busNumber: currentReport.busNumber,
-      photoUrls: currentReport.photos, 
+      photoUrls: uploadedImageUrls, 
       status: currentReport.status,
       name: currentReport.name,
       email: currentReport.email,
@@ -652,7 +661,8 @@ const ReportMissingS = ({ navigation, route }) => {
                   - You'll be notified when:{'\n'}
                   • An operator/driver finds your item{'\n'}
                   • Your report approaches 30 days old{'\n'}
-                  - Update status if found or delete report
+                  - Update status if found or delete report{'\n'}
+                  - If you find an item that is not yours, please hand it over to the nearest station operator.
                 </Text>
                 <Text style={styles.noteText}>
               Note: Reports auto-expire after 30 days

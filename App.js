@@ -21,6 +21,7 @@ import BusDetails from './screens/BusDetails';
 import notification from './screens/notification';
 import feedback from './screens/feedback';
 import evaluation from './screens/evaluation';
+import Profile from './screens/Profile';
 
 
 const Stack = createStackNavigator();
@@ -68,6 +69,7 @@ const App = () => {
         <Stack.Screen name="notification" component={notification} />
         <Stack.Screen name="feedback" component={feedback} />
         <Stack.Screen name="evaluation" component={evaluation} />
+        <Stack.Screen name="Profile" component={Profile} />
         </Stack.Navigator>
     </NavigationContainer>
     </GestureHandlerRootView>

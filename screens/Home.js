@@ -14,15 +14,13 @@ const Home = ({ navigation, route }) => {
     {
       title: "Give Feedback",
       icon: "comment-outline",
-      action: () => navigation.navigate("feedback"),
+      action: () => navigation.navigate("feedback", {role}),
     },
     {
       title: "Report Missing Items",
       icon: "alert-circle-outline",
       action: () => navigation.navigate("ReportMissingS",{
-        userName: "Test Student",
-        userEmail: "test@university.edu",
-        role: "student"})
+        role: 'STUDENT'})
     },
     {
       title: "View Bus Schedule",
@@ -32,7 +30,7 @@ const Home = ({ navigation, route }) => {
     {
       title: "View Notifications",
       icon: "bell-outline",
-      action: () => navigation.navigate("notification"),
+      action: () => navigation.navigate("notification", {role}),
     },
     {
       title: "Profile",
@@ -44,7 +42,7 @@ const Home = ({ navigation, route }) => {
     {
       title: "Update Bus Schedule",
       icon: "pencil-outline",
-      action: () => navigation.navigate("UpdateSchedule"),
+      action: () => navigation.navigate("updateschedule"),
     },
     {
       title: "Report Missing Items",
@@ -54,17 +52,17 @@ const Home = ({ navigation, route }) => {
     {
       title: "Notify Students",
       icon: "message-alert-outline",
-      action: () => navigation.navigate("notification"),
+      action: () => navigation.navigate("notification", {role}),
     },
     {
       title: "Students' Feedback",
       icon: "account-check-outline",
-      action: () => navigation.navigate("evaluation"),
+      action: () => navigation.navigate("evaluation", {role}),
     },
     {
       title: "View Notifications",
       icon: "bell-ring-outline",
-      action: () => navigation.navigate("notification"),
+      action: () => navigation.navigate("notification", {role}),
     },
     {
       title: "Profile",
@@ -82,12 +80,12 @@ const Home = ({ navigation, route }) => {
     {
       title: "Notify Students",
       icon: "message-alert-outline",
-      action: () => navigation.navigate("notification"),
+      action: () => navigation.navigate("notification", {role}),
     },
     {
       title: "View Notifications",
       icon: "bell-ring-outline",
-      action: () => navigation.navigate("notification"),
+      action: () => navigation.navigate("notification",{role}),
     },
     {
       title: "Profile",
@@ -117,7 +115,7 @@ const Home = ({ navigation, route }) => {
        <View style={styles.topBar}>
         <Text style={styles.appName}>HUrry</Text>
         <View style={styles.iconContainer}>
-          <TouchableOpacity onPress={() => navigation.navigate("Notifications")}>
+          <TouchableOpacity onPress={() => navigation.navigate("notification", {role})}>
             <Icon name="bell-outline" size={25} color="#fff" />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate("Profile", {role})} style={{ marginLeft: 15 }}>
@@ -147,15 +145,15 @@ const Home = ({ navigation, route }) => {
           <Icon name="home-outline" size={25} color="#59B3F8" />
           <Text style={styles.navText}>Home</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate(role === "OPERATOR" ? 'UpdateSchedule' : 'busSchedule')} style={styles.navItem}>
+        <TouchableOpacity onPress={() => navigation.navigate(role === "OPERATOR" ? 'updateschedule' : 'busSchedule')} style={styles.navItem}>
           <Icon name="calendar-clock" size={25} color="#59B3F8" />
           <Text style={styles.navText}>Schedule</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate("Feedback")} style={styles.navItem}>
+        <TouchableOpacity onPress={() => navigation.navigate("feedback")} style={styles.navItem}>
           <Icon name="comment-outline" size={25} color="#59B3F8" />
           <Text style={styles.navText}>Feedback</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate("ReportMissing")} style={styles.navItem}>
+        <TouchableOpacity onPress={() => navigation.navigate(role === "OPERATOR" ? 'ReportMissingOD' : 'ReportMissingS')} style={styles.navItem}>
           <Icon name="alert-circle-outline" size={25} color="#59B3F8" />
           <Text style={styles.navText}>Missing</Text>
         </TouchableOpacity>
