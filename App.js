@@ -56,20 +56,20 @@ const App = () => {
          headerTintColor: 'black',  // To change the color of any text/icon in the header
        }}
         />
-         <Stack.Screen name="ClosestBusStation" component={ClosestBusStation} />
+         <Stack.Screen name="ClosestBusStation" component={ClosestBusStation} options={{  headerTitle: '    ' }} />
           <Stack.Screen name="ReportMissingS" component={ReportMissingS} options={{
-          headerTitle: 'Report Missing Item'}}/>
+          headerTitle: '  '}}/>
         <Stack.Screen name="ReportMissingOD" component={ReportMissingOD} options={{
-          headerTitle: 'Report Missing Item'}} />
+          headerTitle: '  '}} />
 
-          <Stack.Screen name="updateschedule" component={updateschedule} />
-          <Stack.Screen name="busSchedule" component={busSchedule} />
-        <Stack.Screen name="updateBus" component={updateBus} />
-        <Stack.Screen name="BusDetails" component={BusDetails} />
-        <Stack.Screen name="notification" component={notification} />
-        <Stack.Screen name="feedback" component={feedback} />
-        <Stack.Screen name="evaluation" component={evaluation} />
-        <Stack.Screen name="Profile" component={Profile} />
+          <Stack.Screen name="updateschedule" component={updateschedule} options={{  headerTitle: '' }} />
+          <Stack.Screen name="busSchedule" component={busSchedule} options={{ headerTitle: ' ' }} />
+        <Stack.Screen name="updateBus" component={updateBus} options={{ headerTitle: '    ' }}/>
+        <Stack.Screen name="BusDetails" component={BusDetails} options={{headerTitle: '  ' }} />
+        <Stack.Screen name="notification" component={notification} options={{  headerTitle: '    ' }} />
+        <Stack.Screen name="feedback" component={feedback} options={{  headerTitle: '    ' }} />
+        <Stack.Screen name="evaluation" component={evaluation} options={{  headerTitle: '    ' }} />
+        <Stack.Screen name="Profile" component={Profile}  />
         </Stack.Navigator>
     </NavigationContainer>
     </GestureHandlerRootView>

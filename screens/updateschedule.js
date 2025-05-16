@@ -14,8 +14,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 
 const API_URL = {
-  Zarqa: 'https://2fbd-2a01-9700-80db-d300-10c1-b5b3-7169-c9e6.ngrok-free.app/zarqa/add',
-  Amman:  'https://2fbd-2a01-9700-80db-d300-10c1-b5b3-7169-c9e6.ngrok-free.app/amman/add',
+  Zarqa: 'https://c54e-91-186-230-143.ngrok-free.app/zarqa/add',
+  Amman:  'https://c54e-91-186-230-143.ngrok-free.app/amman/add',
 }
 
 const updateschedule = () => {

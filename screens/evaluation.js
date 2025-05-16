@@ -12,7 +12,10 @@ import {
   Modal,
   Pressable,
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+//
+// import { Picker } from '@react-native-picker/picker';
+import * as ImagePicker from 'expo-image-picker';
+import RNPickerSelect from 'react-native-picker-select';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -22,17 +25,17 @@ const evaluation = ({ route, navigation }) => {
   const [authToken, setAuthToken] = useState('');
   const [evaluationType, setEvaluationType] = useState('');
 
-  // روابط API للطالب
+  
   const STUDENT_TRIP_API_URL =
-    'https://2fbd-2a01-9700-80db-d300-10c1-b5b3-7169-c9e6.ngrok-free.app/questions/submit';
+    'https://c54e-91-186-230-143.ngrok-free.app/questions/submit';
   const STUDENT_DRIVER_API_URL =
-    'https://2fbd-2a01-9700-80db-d300-10c1-b5b3-7169-c9e6.ngrok-free.app/questions2/submit';
+    'https://c54e-91-186-230-143.ngrok-free.app/questions2/submit';
 
-  // روابط API للمشغل
+  
   const OPERATOR_TRIP_API_URL =
-    'https://2fbd-2a01-9700-80db-d300-10c1-b5b3-7169-c9e6.ngrok-free.app/questions/page';
+    'https://c54e-91-186-230-143.ngrok-free.app/questions/page';
   const OPERATOR_DRIVER_API_URL =
-    'https://2fbd-2a01-9700-80db-d300-10c1-b5b3-7169-c9e6.ngrok-free.app/questions2/page';
+    'https://c54e-91-186-230-143.ngrok-free.app/questions2/page';
 
   const tripQuestions = [
     'How satisfied are you with the overall bus trip experience?',
@@ -107,7 +110,6 @@ const evaluation = ({ route, navigation }) => {
   const fetchEvaluations = async (token) => {
     setLoading(true);
     try {
-      // استخدام الرابط المناسب حسب نوع التقييم
       const apiUrl =
         evaluationType === 'TRIP'
           ? OPERATOR_TRIP_API_URL
@@ -181,7 +183,6 @@ const evaluation = ({ route, navigation }) => {
 
     console.log('Data being sent:', evaluationData);
     try {
-      // استخدام الرابط المناسب حسب نوع التقييم
       const apiUrl =
         evaluationType === 'TRIP'
           ? STUDENT_TRIP_API_URL
@@ -348,24 +349,35 @@ const evaluation = ({ route, navigation }) => {
         </Text>
       </View>
 
-      {question.map((question, index) => (
+      {question.map((question, index) => {
+      
+      const options = answerOptions[index] || [];
+  console.log(`Question ${index} options:`, options);
+      
+      return (
         <View key={index} style={styles.questionContainer}>
           <Text style={styles.questionText}>
             <Icon name="comment-question" size={20} color="#59B3F8" />{' '}
             {question}
           </Text>
-          <Picker
-            selectedValue={answer[index]}
-            onValueChange={(itemValue) => handleAnswerChange(index, itemValue)}
-            style={styles.picker}
-            dropdownIconColor="#59B3F8">
-            <Picker.Item label="Select an option" value="" />
-            {answerOptions[index].map((option, optIndex) => (
-              <Picker.Item key={optIndex} label={option} value={option} />
-            ))}
-          </Picker>
+          <View style={styles.pickerContainer}>
+          <RNPickerSelect
+  onValueChange={(value) => handleAnswerChange(index, value)}
+  items={answerOptions[index].map((option) => ({
+    label: option,
+    value: option,
+  }))}
+  placeholder={{ label: "Select an option", value: null }}
+  value={answer[index]}
+  style={styles.inputIOS}
+  useNativeAndroidPickerStyle={false} // Force iOS style
+  Icon={() => <Icon name="chevron-down" size={20} color="gray" />} // Add dropdown icon
+  fixAndroidTouchableBug
+/>
+</View>
         </View>
-      ))}
+      );
+      })}
 
       <TouchableOpacity
         style={styles.submitButton}
@@ -452,15 +464,15 @@ const evaluation = ({ route, navigation }) => {
         Evaluation Answers
       </Text>
 
-      {item.questions &&
-        item.answers &&
-        item.questions.split(', ').map((q, qIndex) => (
+      {item.question &&
+        item.answer &&
+        item.question.split(', ').map((q, qIndex) => (
           <View key={qIndex} style={styles.answerCard}>
             <Text style={styles.questionTextt}>
               <Icon name="comment-question" size={16} color="#59B3F8" /> {q}
             </Text>
             <Text style={styles.answerText}>
-              {item.answers.split(', ')[qIndex] || 'No answer'}
+              {item.answer.split(', ')[qIndex] || 'No answer'}
             </Text>
           </View>
         ))}
@@ -540,7 +552,10 @@ const evaluation = ({ route, navigation }) => {
           <Text style={styles.navText}>Evaluation</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => navigation.navigate('ContactUs', { role })}
+          onPress={() =>
+            navigation.navigate(
+              role === 'OPERATOR' ? 'ReportMissingOD' : 'ReportMissingS')
+          }
           style={styles.navItem}>
           <Icon name="alert-circle-outline" size={25} color="#59B3F8" />
           <Text style={styles.navText}>Missing</Text>
@@ -893,6 +908,36 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
   },
+ 
+  inputIOS: {
+    fontSize: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: 'gray',
+    borderRadius: 4,
+    color: 'black',
+    height: 50,
+    backgroundColor: 'yellow'
+  },
+  inputAndroid: {
+    fontSize: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderWidth: 0.5,
+    borderColor: 'gray',
+    borderRadius: 8,
+    color: 'black',
+  },
+  pickerContainer: {
+  borderWidth: 1,
+  borderColor: '#E0E0E0',
+  borderRadius: 8,
+  marginVertical: 8,
+  height: 40, // Ensure touchable height
+  justifyContent: 'center', // Center the picker text
+},
+
 });
 
 export default evaluation;

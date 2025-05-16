@@ -16,10 +16,10 @@ const notification = ({ route, navigation }) => {
 
     const API_URLS = {
         OPERATOR: {
-            SEND: 'https://2fbd-2a01-9700-80db-d300-10c1-b5b3-7169-c9e6.ngrok-free.app/announcements/create',
+            SEND: 'https://c54e-91-186-230-143.ngrok-free.app/announcements/create',
         },
         OTHERS: {
-            GET: 'https://2fbd-2a01-9700-80db-d300-10c1-b5b3-7169-c9e6.ngrok-free.app/announcements/view'
+            GET: 'https://c54e-91-186-230-143.ngrok-free.app/announcements/view'
         }
     };
 
@@ -353,7 +353,7 @@ const notification = ({ route, navigation }) => {
         </ScrollView>
             {/* Bottom Navigation */}
             <View style={styles.bottomNav}>
-                    <TouchableOpacity onPress={() => navigation.navigate("Home", { role })} style={styles.navItem}>
+                    <TouchableOpacity onPress={() => navigation.navigate("oprator", { userRole })} style={styles.navItem}>
                       <Icon name="home-outline" size={25} color="#59B3F8" />
                       <Text style={styles.navText}>Home</Text>
                     </TouchableOpacity>
@@ -365,7 +365,7 @@ const notification = ({ route, navigation }) => {
                       <Icon name="comment-outline" size={25} color="#59B3F8" />
                       <Text style={styles.navText}>Feedback</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => navigation.navigate(role === "OPERATOR" ? 'ReportMissingOD' : 'ReportMissingS')} style={styles.navItem}>
+                    <TouchableOpacity onPress={() => navigation.navigate("ContactUs",{userRole})} style={styles.navItem}>
                       <Icon name="alert-circle-outline" size={25} color="#59B3F8" />
                       <Text style={styles.navText}>Missing</Text>
                     </TouchableOpacity>
@@ -449,6 +449,7 @@ const styles = StyleSheet.create({
     },
     emergencyText: {
         color: '#D32F2F',
+        fontWeight: 'bold',
     },
     notificationText: {
         fontSize: 16,
@@ -472,6 +473,16 @@ const styles = StyleSheet.create({
         fontSize: 10,
         fontWeight: 'bold',
     },
+    emergencyBadge: {
+    backgroundColor: '#FF5252',
+    color: 'white',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginLeft: 10,
+},
     sectionContainer: {
         padding: 15,
         backgroundColor: '#fff',

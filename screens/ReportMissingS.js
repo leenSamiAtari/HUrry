@@ -5,9 +5,9 @@ import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_URL = "https://9557-91-186-250-146.ngrok-free.app";
+const API_URL = "https://c54e-91-186-230-143.ngrok-free.app";
 
 
 const ReportMissingS = ({ navigation, route }) => {
@@ -44,8 +44,9 @@ const ReportMissingS = ({ navigation, route }) => {
     const fetchReports = async () => {
       setIsLoading(true);
       try {
-        const token = await SecureStore.getItemAsync('userToken');
-        const response = await fetch(`${API_URL}/report-missing/create`,{
+        const token = await AsyncStorage.getItem('authToken');
+        const response = await fetch(`${API_URL}/report-missing/my-reports`,{
+          method: 'GET',
           headers: {
            'Authorization' : `Bearer ${token}`
           }
@@ -53,11 +54,11 @@ const ReportMissingS = ({ navigation, route }) => {
       );
         const data = await response.json();
         const convertedData = data.map(item => ({
-          ...item,
-          dateLost: new Date(item.dateLost),
-          timeApproximate: new Date(item.timeApproximate),
-          dateSubmitted: new Date(item.dateSubmitted)
-        }));
+  ...item,
+  dateLost: item.dateLost ? new Date(item.dateLost) : new Date(), // Parse date string
+  timeApproximate: item.timeApproximate ? new Date(`1970-01-01T${item.timeApproximate}Z`) : new Date(), // Convert time string to Date
+  dateSubmitted: new Date(item.dateSubmitted)
+}));
         
         setReports(convertedData);
         setReports(data);
@@ -142,9 +143,9 @@ const ReportMissingS = ({ navigation, route }) => {
   const handleDeleteReport = async (index) => {
     const id = reports[index].id;
     try {
-      const token = await SecureStore.getItemAsync('userToken');
+      const token = await AsyncStorage.getItem('authToken');
 
-      const response = await fetch(`${API_URL}/report-missing/create/${id}`, {
+      const response = await fetch(`${API_URL}/report-missing/my-reports/${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -276,7 +277,7 @@ const ReportMissingS = ({ navigation, route }) => {
 
     setIsLoading(true);
     try {
-      const token = await SecureStore.getItemAsync('userToken');
+      const token = await AsyncStorage.getItem('authToken');
       const method = currentReport.isEditing ? 'PUT' : 'POST';
       const url = currentReport.isEditing 
         ? `${API_URL}/report-missing/create/${currentReport.id}`
@@ -302,8 +303,10 @@ const ReportMissingS = ({ navigation, route }) => {
       containsItems: currentReport.containsItems,
       itemsInside: currentReport.itemsInside,
       uniqueFeatures: currentReport.uniqueFeatures,
-      dateLost: currentReport.dateLost.toISOString(),
-      timeApproximate: currentReport.timeApproximate.toISOString(),
+      dateLost: currentReport.dateLost.toISOString().split('T')[0],
+      timeApproximate: currentReport.timeApproximate.toISOString()
+      .split('T')[1]
+      .split('.')[0],
       locationType: currentReport.locationType,
       station: currentReport.station,
       busNumber: currentReport.busNumber,
@@ -311,7 +314,6 @@ const ReportMissingS = ({ navigation, route }) => {
       status: currentReport.status,
       name: currentReport.name,
       email: currentReport.email,
-      dateSubmitted: currentReport.dateSubmitted.toISOString(),
       phoneNumber: currentReport.phoneNumber,
       sharePhone: currentReport.sharePhone,
       ...(currentReport.isEditing && { id: currentReport.id }), // Include id for editing
@@ -345,8 +347,8 @@ const ReportMissingS = ({ navigation, route }) => {
   const handleMarkAsFound = async (index) => {
     const id = reports[index].id;
     try {
-      const token = await SecureStore.getItemAsync('userToken');
-      const response = await fetch(`${API_URL}/report-missing/create/${id}`, {
+      const token = await AsyncStorage.getItem('authToken');
+      const response = await fetch(`${API_URL}/report-missing/status/{status}/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

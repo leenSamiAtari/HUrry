@@ -17,7 +17,7 @@ const BusDetails = ({ route, navigation }) => {
         if (!authToken) {
           throw new Error('No authentication token found');
         }
-        const apiUrl = 'https://2fbd-2a01-9700-80db-d300-10c1-b5b3-7169-c9e6.ngrok-free.app/buses/all'; 
+        const apiUrl = 'https://a1d2-109-107-251-133.ngrok-free.app/buses/all'; 
 
         
         const response = await fetch(apiUrl, {

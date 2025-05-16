@@ -4,17 +4,18 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 const Home = ({ navigation, route }) => {
   const { role } = route.params; // Role passed from the sign-in page
+   const { token } = route.params;
 
   const studentMenuItems = [
     {
       title: "Closest Bus Station",
       icon: "map-marker-radius",
-      action: () => navigation.navigate("ClosestBusStation"),
+      action: () => navigation.navigate("ClosestBusStation", {role:'STUDENT'}),
     },
     {
       title: "Give Feedback",
       icon: "comment-outline",
-      action: () => navigation.navigate("feedback", {role}),
+      action: () => navigation.navigate("evaluation", {role}),
     },
     {
       title: "Report Missing Items",
@@ -33,9 +34,9 @@ const Home = ({ navigation, route }) => {
       action: () => navigation.navigate("notification", {role}),
     },
     {
-      title: "Profile",
-      icon: "account-circle-outline",
-      action: () => navigation.navigate("Profile", { role }),
+      title: "Messages",
+      icon: "email",
+      action: () => navigation.navigate("feedback", { role }),
     },
   ];
   const operatorMenuItems = [
@@ -45,9 +46,9 @@ const Home = ({ navigation, route }) => {
       action: () => navigation.navigate("updateschedule"),
     },
     {
-      title: "Report Missing Items",
+      title: "Missing Items Reports",
       icon: "alert-circle-outline",
-      action: () => navigation.navigate("ReportMissingOD"),
+      action: () => navigation.navigate("ReportMissingOD" ,{role}),
     },
     {
       title: "Notify Students",
@@ -65,17 +66,17 @@ const Home = ({ navigation, route }) => {
       action: () => navigation.navigate("notification", {role}),
     },
     {
-      title: "Profile",
-      icon: "account-circle-outline",
-      action: () => navigation.navigate("Profile", { role }),
+      title: "Messages",
+      icon: "email",
+      action: () => navigation.navigate("feedback", { role }),
     },
   ];
   
   const driverMenuItems = [
     {
-      title: "Report Missing Items",
+      title: "Missing Items Reports",
       icon: "alert-circle-outline",
-      action: () => navigation.navigate("ReportMissingOD"),
+      action: () => navigation.navigate("ReportMissingOD" ,{role}),
     },
     {
       title: "Notify Students",
@@ -88,9 +89,9 @@ const Home = ({ navigation, route }) => {
       action: () => navigation.navigate("notification",{role}),
     },
     {
-      title: "Profile",
-      icon: "account-circle-outline",
-      action: () => navigation.navigate("Profile", { role }),
+      title: "Messages",
+      icon: "email",
+      action: () => navigation.navigate("feedback", { role }),
     },
   ];
   
@@ -149,7 +150,7 @@ const Home = ({ navigation, route }) => {
           <Icon name="calendar-clock" size={25} color="#59B3F8" />
           <Text style={styles.navText}>Schedule</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate("feedback")} style={styles.navItem}>
+        <TouchableOpacity onPress={() => navigation.navigate("feedback",{role})} style={styles.navItem}>
           <Icon name="comment-outline" size={25} color="#59B3F8" />
           <Text style={styles.navText}>Feedback</Text>
         </TouchableOpacity>

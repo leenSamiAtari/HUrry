@@ -22,7 +22,8 @@ const feedback = ({ route, navigation }) => {
   const [formData, setFormData] = useState({
     content: '',
     receiverEmail: '',
-    receiverRole: ''
+    receiverRole: '',
+    
   });
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -33,8 +34,8 @@ const feedback = ({ route, navigation }) => {
   const filteredReceiverRoles = receiverRoles.filter(r => r !== role);
 
   const API_URLS = {
-    SEND: 'https://2fbd-2a01-9700-80db-d300-10c1-b5b3-7169-c9e6.ngrok-free.app/comments/submit',
-    RECEIVE: 'https://2fbd-2a01-9700-80db-d300-10c1-b5b3-7169-c6e6.ngrok-free.app/comments/page'
+    SEND: 'https://c54e-91-186-230-143.ngrok-free.app/comments/submit',
+    RECEIVE: 'https://c54e-91-186-230-143.ngrok-free.app/comments/page'
   };
 
   useEffect(() => {
@@ -70,7 +71,8 @@ const feedback = ({ route, navigation }) => {
         body: JSON.stringify({
           content: formData.content,
           receiverEmail: formData.receiverEmail,
-          receiverRole: formData.receiverRole
+          receiverRole: formData.receiverRole,
+         // bus_number: 0
         }),
       });
 
@@ -154,12 +156,8 @@ const feedback = ({ route, navigation }) => {
         <Text style={styles.detailText}>
           <Icon name="email" size={14} color="#666" /> Sender Email: {item.senderEmail}
         </Text>
-        <Text style={styles.detailText}>
-          <Icon name="account" size={14} color="#666" /> To: {item.receiverRole}
-        </Text>
-        <Text style={styles.detailText}>
-          <Icon name="email" size={14} color="#666" /> Receiver Email: {item.receiverEmail}
-        </Text>
+        
+        
       </View>
       <Text style={styles.feedbackDate}>
         <Icon name="clock-outline" size={14} color="#999" /> 
@@ -340,10 +338,10 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   form: {
-    padding: 20,
+    padding: 15,
     backgroundColor: '#ffffff',
     borderRadius: 10,
-    margin: 20,
+    margin: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -351,11 +349,12 @@ const styles = StyleSheet.create({
     elevation: 3,
     borderWidth: 1, 
     borderColor: '#ddd',
+    marginTop:5,
   },
   input: {
     borderWidth: 1,
     borderColor: '#ddd',
-    padding: 15,
+    padding: 5,
     borderRadius: 8,
     backgroundColor: '#FCFCFC',
     fontSize: 16,
@@ -499,10 +498,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   buttonContainer: {
-    marginTop: 20,
+    marginTop: 10,
     borderRadius: 8,
     backgroundColor: '#59B3F8',
-    paddingVertical: 12,
+    paddingVertical:4,
+    paddingBottom: 10,
     paddingHorizontal: 20,
     alignItems: 'center',
     shadowColor: '#000',
@@ -512,6 +512,7 @@ const styles = StyleSheet.create({
     elevation: 3,
     borderWidth: 1,
     borderColor: '#4a9bd6',
+    alignSelf:'center',
   },
   buttonText: {
     color: '#fff',

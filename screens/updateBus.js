@@ -60,7 +60,7 @@ const updateBus = ({ route, navigation }) => {
     }
 
     try {
-      const response = await fetch('https://2fbd-2a01-9700-80db-d300-10c1-b5b3-7169-c9e6.ngrok-free.app/buses/add', {
+      const response = await fetch('https://c54e-91-186-230-143.ngrok-free.app/buses/add', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

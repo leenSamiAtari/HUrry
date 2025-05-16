@@ -5,7 +5,7 @@ import * as Location from 'expo-location';
 import MapView, { Marker } from 'react-native-maps';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
-const API_URL = "https://your-ngrok-url.ngrok.io";
+const API_URL = "https://c54e-91-186-230-143.ngrok-free.app";
 
 const COLORS = {
   primary: '#2F80ED',
@@ -21,6 +21,16 @@ const STATION_DATA_EXPIRY = 24 * 60 * 60 * 1000; // 24h (station names/coordinat
 const ROUTING_DATA_EXPIRY = 15 * 60 * 1000; // 15m (distances/times from API)
 
 
+const saveUserToken = async (token) => {
+  try {
+    // Use "authToken" to match your SignIn screen
+    await AsyncStorage.setItem('authToken', token);
+    setUserToken(token);
+  } catch (error) {
+    console.error('Error saving user token:', error);
+  }
+};
+
 const ClosestBusStation = () => {
   const [userLocation, setUserLocation] = useState(null);
   const [nearbyStations, setNearbyStations] = useState([]);
@@ -29,6 +39,19 @@ const ClosestBusStation = () => {
   const [region, setRegion] = useState(null);
   const [isCached, setIsCached] = useState(false);
   const fadeAnim = useState(new Animated.Value(0))[0];
+   const [userToken, setUserToken] = useState(null);
+
+   const getUserToken = async () => {
+    try {
+      // Use "authToken" to match your SignIn screen
+      const token = await AsyncStorage.getItem('authToken');
+      setUserToken(token);
+      return token;
+    } catch (error) {
+      console.error('Error retrieving user token:', error);
+      return null;
+    }
+  };
 
  const cleanExpiredCache = async () => {
     const allKeys = await AsyncStorage.getAllKeys();
@@ -78,6 +101,12 @@ const ClosestBusStation = () => {
 
   const fetchNearbyStations = async (latitude, longitude) => {
     try {
+       const token = await getUserToken();
+        if (!token) {
+      setErrorMsg('Authentication required. Please sign in again.');
+      setStatus('error');
+      return;
+    }
       const cached = await getCachedData(latitude, longitude);
       if (cached) {
         setNearbyStations(cached);
@@ -90,7 +119,7 @@ const ClosestBusStation = () => {
         return;
       }
 
-      const url = new URL(`${API_URL}/busStation/closest-stations`);
+      const url = new URL(`${API_URL}/closest-station/find`);
       url.searchParams.append('lat', latitude);
       url.searchParams.append('lon', longitude);
       
@@ -98,9 +127,15 @@ const ClosestBusStation = () => {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
-          'ngrok-skip-browser-warning': 'true'
+          'ngrok-skip-browser-warning': 'true',
+          'Authorization': `Bearer ${token}`
         }
       });
+       if (response.status === 401) {
+      setErrorMsg('Your session has expired. Please sign in again.');
+      setStatus('error');
+      return;
+    }
 
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       
@@ -152,6 +187,7 @@ const ClosestBusStation = () => {
 
   useEffect(() => {
     (async () => {
+      await getUserToken();
       const { status } = await Location.getForegroundPermissionsAsync();
       if (status === 'granted') {
         handleRefresh();

@@ -16,13 +16,13 @@ const Welcome = () => {
       <Text style={styles.subtitle}>How would you describe yourself?</Text>
 
       {/* Add your buttons here */}
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Home', { role: 'STUDENT', userName: "Test User", userEmail: "test@example.com" })}>
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('SignUp', { role: 'STUDENT', userName: "Test User", userEmail: "test@example.com" })}>
         <Text style={styles.buttonText}>Student</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Home', { role: 'DRIVER' })}>
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('SignUp', { role: 'DRIVER' })}>
         <Text style={styles.buttonText}>Driver</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Home', { role: 'OPERATOR' })}>
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('SignUp', { role: 'OPERATOR' })}>
         <Text style={styles.buttonText}>Operator</Text>
       </TouchableOpacity>
 

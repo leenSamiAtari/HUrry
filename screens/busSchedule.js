@@ -38,8 +38,8 @@ const busSchedule = () => {
   const loadSchedules = async () => {
     try {
       const url = selectedCity === 'Amman'
-        ? `https://2fbd-2a01-9700-80db-d300-10c1-b5b3-7169-c9e6.ngrok-free.app/amman/Bus_Stations`
-        : `https://2fbd-2a01-9700-80db-d300-10c1-b5b3-7169-c9e6.ngrok-free.app/zarqa/Bus_Stations`;
+        ? `https://a1d2-109-107-251-133.ngrok-free.app/amman/Bus_Stations`
+        : `https://a1d2-109-107-251-133.ngrok-free.app/zarqa/Bus_Stations`;
       
       const response = await fetch(url, {
         headers: {
@@ -146,11 +146,11 @@ const busSchedule = () => {
           <Icon name="calendar-clock" size={25} color="#59B3F8" />
           <Text style={styles.navText}>Schedule</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate("feedback",{role:'STUDENT'})} style={styles.navItem}>
+        <TouchableOpacity onPress={() => navigation.navigate("evaluation",{role:'STUDENT'})} style={styles.navItem}>
           <Icon name="comment-outline" size={25} color="#59B3F8" />
           <Text style={styles.navText}>Feedback</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate("ContactUs",{role:'STUDENT'})} style={styles.navItem}>
+        <TouchableOpacity onPress={() => navigation.navigate("ReportMissingS",{role:'STUDENT'})} style={styles.navItem}>
           <Icon name="alert-circle-outline" size={25} color="#59B3F8" />
           <Text style={styles.navText}>Missing</Text>
         </TouchableOpacity>

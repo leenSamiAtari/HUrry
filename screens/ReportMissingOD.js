@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView, StyleSheet, Text, Image, Linking } from 'react-native';
-import { Card, Button, Menu, Divider, Provider, TextInput, Icon, Modal, Portal, Snackbar} from 'react-native-paper';
+import { Card, Button, Menu, Divider, Provider, TextInput, Icon, Modal, Portal, Snackbar, SegmentedButtons} from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_URL = "https://your-ngrok-url.ngrok.io";
+const API_URL = "https://c54e-91-186-230-143.ngrok-free.app";
 
 const ReportMissingOD = ({ navigation }) => {
   const [items, setItems] = useState([]);
@@ -16,17 +16,19 @@ const ReportMissingOD = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [fetchError, setFetchError] = useState(null);
-   const [token, setToken] = useState(''); 
+   const [activeTab, setActiveTab] = useState('pending');
 
-  const fetchItems = async () => {
+  const fetchItems = async (statusFilter = '') => {
     try {
-      //const storedToken = await SecureStore.getItemAsync('userToken');
-      //setToken(storedToken);
-
-      const response = await fetch(`${API_URL}/report-missing/create`,{
-       // headers: {
-        //  'Authorization' : `Bearer ${token}`
-       // }
+      const token = await AsyncStorage.getItem('authToken');
+       let url = `${API_URL}/report-missing/status/{status}`;
+      if (statusFilter) {
+        url += `?status=${statusFilter}`;
+      }
+      const response = await fetch(`${API_URL}/report-missing/status/{status}`,{
+        headers: {
+          'Authorization' : `Bearer ${token}`
+        }
       });
   
       if (!response.ok) throw new Error('Server response not OK');
@@ -47,10 +49,9 @@ const ReportMissingOD = ({ navigation }) => {
     }
   };
 
-  useEffect(() => {
-    fetchItems(); 
-  }, []);
-
+   useEffect(() => {
+    fetchItems(activeTab === 'pending' ? 'pending' : (activeTab === 'found' ? 'found' : ''));
+  }, [activeTab]);
 
    // Date formatting helpers
    const formatDate = (date) => {
@@ -78,6 +79,11 @@ const ReportMissingOD = ({ navigation }) => {
   
 
   const filteredItems = items.filter(item => {
+     const matchesTab =
+      activeTab === 'pending' ? item.status === 'pending' :
+      activeTab === 'found' ? item.status === 'found' :
+      true; // Show all if no tab selected
+
     const matchesStation = selectedStation ? 
       item.station.toLowerCase() === selectedStation.toLowerCase() : 
       true;
@@ -108,6 +114,22 @@ const ReportMissingOD = ({ navigation }) => {
     <Provider>
       <ScrollView contentContainerStyle={styles.container}>
       <ErrorSnackbar />
+      <SegmentedButtons
+          value={activeTab}
+          onValueChange={setActiveTab}
+          style={styles.tabButtons}
+          buttons={[
+            {
+              value: 'pending',
+              label: 'Pending Reports',
+            },
+            {
+              value: 'found',
+              label: 'Found Reports',
+            },
+          ]}
+        />
+
       {!fetchError && filteredItems.length === 0 && (
           <Text style={styles.emptyText}>No items found matching your search</Text>
         )}
@@ -457,6 +479,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginVertical: 5
+  },
+   tabButtons: {
+    marginBottom: 16,
+    marginHorizontal: 16,
+  },
+  loadingText: {
+    textAlign: 'center',
+    marginTop: 20,
+    color: '#59B3F8',
+    fontSize: 16,
+  },
+  statusText: {
+    fontWeight: 'bold',
+    marginTop: 8,
+    color: '#4CAF50', // Example color for 'found' status
   },
 });
 

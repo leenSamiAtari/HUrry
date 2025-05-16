@@ -1,10 +1,8 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert,Keyboard, ImageBackground } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from '@react-navigation/native';
-import * as SecureStore from 'expo-secure-store';
-
-const API_URL = "https://9557-91-186-250-146.ngrok-free.app";
 
 const SignIn = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -18,7 +16,7 @@ const SignIn = ({ navigation }) => {
   
     try {
       // Make the API call to sign in
-      const response = await fetch(`${API_URL}/api2/login`, {
+      const response = await fetch("https://c54e-91-186-230-143.ngrok-free.app/api2/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -46,7 +44,7 @@ const SignIn = ({ navigation }) => {
       } else {
         const message = await response.text();
         Alert.alert("Success", message);
-        navigation.navigate("Home", { role }); // Navigate without role if not provided
+        navigation.navigate("Home", { role: null }); // Navigate without role if not provided
         return;
       }
   
@@ -54,11 +52,11 @@ const SignIn = ({ navigation }) => {
       const { role, token } = data;
   
       console.log("User signed in:", data);
-      await SecureStore.setItemAsync("authToken", token);
+      await AsyncStorage.setItem("authToken", token);
       console.log("Token stored:", token);
-  
+     // navigation.navigate("notification",{ role,token });
       // Navigate to Home with the role
-      navigation.navigate("Home", { role, name:formData.name });
+      navigation.navigate("Home", { role,token });
       Alert.alert("Success", "Signed in successfully!");
     } catch (error) {
       // Handle network errors
@@ -104,7 +102,7 @@ const SignIn = ({ navigation }) => {
 
       <TouchableOpacity
         style={styles.link}
-        onPress={() => navigation.navigate("Welcome")} // Replace "signUp" with your actual sign-up route
+        onPress={() => navigation.navigate("Home")} // Replace "signUp" with your actual sign-up route
       >
        <Text style={styles.linkText}>Don't have an account? Sign Up</Text>
       </TouchableOpacity>
