@@ -12,10 +12,11 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+import { API_URL } from '../config/Constants';
 
-const API_URL = {
-  Zarqa: 'https://c54e-91-186-230-143.ngrok-free.app/zarqa/add',
-  Amman:  'https://c54e-91-186-230-143.ngrok-free.app/amman/add',
+const API_URLS = {
+  Zarqa: `${API_URL}/zarqa/add`,
+  Amman:  `${API_URL}/amman/add`,
 }
 
 const updateschedule = () => {
@@ -63,7 +64,7 @@ const fetchSchedulesFromAPI = async () => {
       return;
     }
 
-    const response = await fetch(API_URL[selectedCity], {
+    const response = await fetch(API_URLS[selectedCity], {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`, 
@@ -123,7 +124,7 @@ const addSchedule = async () => {
       return;
     }
 
-    await fetch(API_URL[selectedCity], {
+    await fetch(API_URLS[selectedCity], {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -146,7 +147,7 @@ const removeSchedule = async (id) => {
       return;
     }
 
-    await fetch(`${API_URL[selectedCity]}/${id}`, {
+    await fetch(`${API_URLS[selectedCity]}/${id}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,  
@@ -183,7 +184,7 @@ const editSchedule = async (id, field, value) => {
       return;
     }
 
-    await fetch(`${API_URL[selectedCity]}/${id}`, {
+    await fetch(`${API_URLS[selectedCity]}/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

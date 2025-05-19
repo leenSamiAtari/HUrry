@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+import { API_URL } from '../config/Constants';
 
 const busSchedule = () => {
   
@@ -38,8 +39,8 @@ const busSchedule = () => {
   const loadSchedules = async () => {
     try {
       const url = selectedCity === 'Amman'
-        ? `https://a1d2-109-107-251-133.ngrok-free.app/amman/Bus_Stations`
-        : `https://a1d2-109-107-251-133.ngrok-free.app/zarqa/Bus_Stations`;
+        ? `${API_URL}/amman/Bus_Stations`
+        : `${API_URL}/zarqa/Bus_Stations`;
       
       const response = await fetch(url, {
         headers: {

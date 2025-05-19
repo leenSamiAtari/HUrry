@@ -10,6 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../config/Constants';
 
 const updateBus = ({ route, navigation }) => {
   const { scheduleId, numberOfBuses } = route.params;
@@ -60,7 +61,7 @@ const updateBus = ({ route, navigation }) => {
     }
 
     try {
-      const response = await fetch('https://c54e-91-186-230-143.ngrok-free.app/buses/add', {
+      const response = await fetch(`${API_URL}/buses/add`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

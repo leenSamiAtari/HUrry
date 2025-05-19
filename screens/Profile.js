@@ -12,6 +12,7 @@ import {
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../config/Constants';
 
 const Profile= ({ route, navigation }) => {
   const { role } = route.params;
@@ -27,16 +28,16 @@ const Profile= ({ route, navigation }) => {
  
   const API_URLS = {
     STUDENT: {
-      GET: 'https://2fbd-2a01-9700-80db-d300-10c1-b5b3-7169-c9e6.ngrok-free.app/student/profile',
-      PUT: 'https://2fbd-2a01-9700-80db-d300-10c1-b5b3-7169-c9e6.ngrok-free.app/student/profile'
+      GET: `${API_URL}/student/profile`,
+      PUT: `${API_URL}/student/profile`
     },
     DRIVER: {
-      GET: 'https://2fbd-2a01-9700-80db-d300-10c1-b5b3-7169-c9e6.ngrok-free.app/driver/profile',
-      PUT: 'https://2fbd-2a01-9700-80db-d300-10c1-b5b3-7169-c9e6.ngrok-free.app/driver/profile'
+      GET: `${API_URL}/driver/profile`,
+      PUT: `${API_URL}/driver/profile`
     },
     OPERATOR: {
-      GET: 'https://2fbd-2a01-9700-80db-d300-10c1-b5b3-7169-c9e6.ngrok-free.app/operator/profile',
-      PUT: 'https://2fbd-2a01-9700-80db-d300-10c1-b5b3-7169-c9e6.ngrok-free.app/operator/profile'
+      GET: `${API_URL}/operator/profile`,
+      PUT: `${API_URL}/operator/profile`
     }
   };
 

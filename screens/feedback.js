@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../config/Constants';
 
 const feedback = ({ route, navigation }) => {
   const { role } = route.params;
@@ -34,8 +35,8 @@ const feedback = ({ route, navigation }) => {
   const filteredReceiverRoles = receiverRoles.filter(r => r !== role);
 
   const API_URLS = {
-    SEND: 'https://c54e-91-186-230-143.ngrok-free.app/comments/submit',
-    RECEIVE: 'https://c54e-91-186-230-143.ngrok-free.app/comments/page'
+    SEND: `${API_URL}/comments/submit`,
+    RECEIVE: `${API_URL}/comments/page`
   };
 
   useEffect(() => {
@@ -176,7 +177,7 @@ const feedback = ({ route, navigation }) => {
             <TouchableOpacity onPress={() => navigation.navigate("notification", { role })}>
               <Icon name="bell-outline" size={25} color="#fff" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate("profileop", { role })} style={{ marginLeft: 15 }}>
+            <TouchableOpacity onPress={() => navigation.navigate("Profile", { role })} style={{ marginLeft: 15 }}>
               <Icon name="account-circle-outline" size={25} color="#fff" />
             </TouchableOpacity>
           </View>

@@ -5,7 +5,7 @@ import * as Location from 'expo-location';
 import MapView, { Marker } from 'react-native-maps';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
-const API_URL = "https://c54e-91-186-230-143.ngrok-free.app";
+import { API_URL } from '../config/Constants';
 
 const COLORS = {
   primary: '#2F80ED',

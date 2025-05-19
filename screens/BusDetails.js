@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { TouchableOpacity } from 'react-native';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../config/Constants';
 
 const BusDetails = ({ route, navigation }) => {
   const { role,scheduleId,operatorEmail,numberOfBuses } = route.params;
@@ -17,10 +18,10 @@ const BusDetails = ({ route, navigation }) => {
         if (!authToken) {
           throw new Error('No authentication token found');
         }
-        const apiUrl = 'https://a1d2-109-107-251-133.ngrok-free.app/buses/all'; 
+        
 
         
-        const response = await fetch(apiUrl, {
+        const response = await fetch(`${API_URL}/buses/all`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${authToken}`,

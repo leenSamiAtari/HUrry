@@ -3,10 +3,9 @@ import { View, ScrollView, StyleSheet, Text, Image, Linking } from 'react-native
 import { Card, Button, Menu, Divider, Provider, TextInput, Icon, Modal, Portal, Snackbar, SegmentedButtons} from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../config/Constants';
 
-const API_URL = "https://c54e-91-186-230-143.ngrok-free.app";
-
-const ReportMissingOD = ({ navigation }) => {
+const ReportMissingOD = ({ navigation, route }) => {
   const [items, setItems] = useState([]);
   const [selectedStation, setSelectedStation] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -17,15 +16,16 @@ const ReportMissingOD = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [fetchError, setFetchError] = useState(null);
    const [activeTab, setActiveTab] = useState('pending');
+   const { role, name, email, studentId } = route.params || {};
 
   const fetchItems = async (statusFilter = '') => {
     try {
       const token = await AsyncStorage.getItem('authToken');
-       let url = `${API_URL}/report-missing/status/{status}`;
+       let url = `${API_URL}/report-missing/status/${statusFilter}`;
       if (statusFilter) {
         url += `?status=${statusFilter}`;
       }
-      const response = await fetch(`${API_URL}/report-missing/status/{status}`,{
+      const response = await fetch(`${API_URL}/report-missing/status/${statusFilter}`,{
         headers: {
           'Authorization' : `Bearer ${token}`
         }
@@ -37,15 +37,22 @@ const ReportMissingOD = ({ navigation }) => {
       // Convert string dates to Date objects
       const formattedData = data.map(item => ({
         ...item,
-        dateLost: new Date(item.dateLost),
-        timeApproximate: new Date(item.timeApproximate)
+        dateLost: item.dateLost ? new Date(item.dateLost) : null,
+        timeApproximate: item.timeApproximate ? new Date(`1970-01-01T${item.timeApproximate}Z`) : null,
+        dateSubmitted: item.dateSubmitted ? new Date(item.dateSubmitted) : null,
+        photos: item.photoUrls || [], // Ensure photos is an array
+        student: item.student || { name: 'Unknown', id: 'N/A' }, // Handle missing student info
       }));
+        
       
       setItems(formattedData);
+      setFetchError(null);
     } catch (error) {
       console.error('Error fetching items:', error);
       setFetchError(error.message);
       setItems([]); 
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -56,7 +63,7 @@ const ReportMissingOD = ({ navigation }) => {
    // Date formatting helpers
    const formatDate = (date) => {
     try {
-      return date.toLocaleDateString();
+      return date ? date.toLocaleDateString() : 'Unknown date';
     } catch {
       return 'Unknown date';
     }
@@ -64,7 +71,7 @@ const ReportMissingOD = ({ navigation }) => {
 
   const formatTime = (date) => {
     try {
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return date? date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Unknown time';
     } catch {
       return 'Unknown time';
     }
@@ -169,10 +176,10 @@ const ReportMissingOD = ({ navigation }) => {
             />
             <Divider />
             <Menu.Item onPress={() => {
-              setSelectedStation('North bus station');
+              setSelectedStation('North Amman Bus Station');
               setMenuVisible(false);
             }} 
-            title="North bus station"
+            title="North Amman Bus Station"
             />
             <Menu.Item onPress={() => {
              setSelectedStation('shafa badran');
@@ -180,6 +187,25 @@ const ReportMissingOD = ({ navigation }) => {
               }} 
              title="shafa badran"
             />
+             <Menu.Item onPress={() => {
+             setSelectedStation('Raghadan');
+             setMenuVisible(false);
+              }} 
+             title="Raghadan"
+            />
+             <Menu.Item onPress={() => {
+             setSelectedStation('Sweileh');
+             setMenuVisible(false);
+              }} 
+             title="Sweileh"
+            />
+             <Menu.Item onPress={() => {
+             setSelectedStation('Zarqa Station');
+             setMenuVisible(false);
+              }} 
+             title="Zarqa Station"
+            />
+             
             {/* Add more stations */}
           </Menu>
         </View>
@@ -194,8 +220,13 @@ const ReportMissingOD = ({ navigation }) => {
             />
             <Card.Content>
               <Text style={styles.itemText}>Description: {item.description}</Text>
-              <Text style={styles.itemText}>Date Reported: {item.date}</Text>
-              <Text style={styles.itemText}>Reported by: {item.student.name} (ID: {item.student.id})</Text>
+              <Text style={styles.itemText}>Date Reported: {formatDate(item.dateSubmitted)}</Text>
+              <View>
+              <Text style={styles.itemText}>Reported by: {item.student && item.student.name ? item.student.name : 'Unknown'}</Text>
+              {item.student.email && (
+      <Text style={styles.itemText}>Email: {item.student.email}</Text>
+    )}
+  </View>
             </Card.Content>
                 <Card.Actions>
   {item.sharePhone && (
@@ -210,7 +241,7 @@ const ReportMissingOD = ({ navigation }) => {
                 mode="contained" 
                 icon="message-text"
                 style={styles.messageButton}
-                onPress={() => navigation.navigate('Chat', { 
+                onPress={() => navigation.navigate("feedback", { role }, { 
                   studentId: item.student.id,
                   itemId: item.id ,
                   authToken: token

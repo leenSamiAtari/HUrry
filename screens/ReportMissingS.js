@@ -6,17 +6,19 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const API_URL = "https://c54e-91-186-230-143.ngrok-free.app";
+import { API_URL } from '../config/Constants';
 
 
 const ReportMissingS = ({ navigation, route }) => {
-  const { name, email} = route.params || {};
+   const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [studentId, setStudentId] = useState('');
   const [reports, setReports] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [currentReport, setCurrentReport] = useState({
+    id: null,
     category: '',
     description: '',
     brand: '',
@@ -31,8 +33,9 @@ const ReportMissingS = ({ navigation, route }) => {
     busNumber: '',
     photos: [],
     status: 'pending',
-    name,
-    email,
+    name: '',
+    email: '',
+    studentId: '',
     dateSubmitted: new Date(),
     isEditing: false,
     phoneNumber: '',
@@ -40,12 +43,65 @@ const ReportMissingS = ({ navigation, route }) => {
   });
 
   useEffect(() => {
-    
+    console.log('Full route object in ReportMissingS:', route);
+    console.log('Route params in ReportMissingS:', route.params);
+    console.log('Name from params:', route.params?.name);
+    console.log('Email from params:', route.params?.email);
+    console.log('Student ID from params:', route.params?.studentId);
+
+    // Set name and email from route params if available
+    if (route.params?.name) {
+      setName(route.params.name);
+      setCurrentReport(prev => ({ ...prev, name: route.params.name }));
+    }
+    if (route.params?.email) {
+      setEmail(route.params.email);
+      setCurrentReport(prev => ({ ...prev, email: route.params.email }));
+    }
+    if (route.params?.studentId) {
+      setStudentId(route.params.studentId);
+      setCurrentReport(prev => ({ ...prev, studentId: route.params.studentId }));
+    } else {
+      // If not in route params, load from AsyncStorage
+      loadUserData();
+    }
+  }, [route.params]);
+
+  const loadUserData = async () => {
+    try {
+      const storedName = await AsyncStorage.getItem('name');
+      const storedEmail = await AsyncStorage.getItem('email');
+      const storedStudentId = await AsyncStorage.getItem('studentId');
+      if (storedName) {
+        setName(storedName);
+        setCurrentReport(prev => ({ ...prev, name: storedName }));
+      }
+      if (storedEmail) {
+        setEmail(storedEmail);
+        setCurrentReport(prev => ({ ...prev, email: storedEmail }));
+      }
+      if (storedStudentId) {
+        setStudentId(storedStudentId);
+        setCurrentReport(prev => ({ ...prev, studentId: storedStudentId }));
+      }
+    } catch (error) {
+      console.error('Error loading user data from AsyncStorage:', error);
+    }
+  };
+
+  useEffect(() => {
     const fetchReports = async () => {
       setIsLoading(true);
       try {
         const token = await AsyncStorage.getItem('authToken');
-        const response = await fetch(`${API_URL}/report-missing/my-reports`,{
+        const storedEmail = await AsyncStorage.getItem('email'); // Ensure you have the email
+
+        if (!storedEmail) {
+          Alert.alert('Error', 'User email not found. Please sign in again.');
+          setIsLoading(false);
+          return;
+        }
+        const response = await fetch(`${API_URL}/report-missing/my-reports?email=${storedEmail}`,{
           method: 'GET',
           headers: {
            'Authorization' : `Bearer ${token}`
@@ -53,15 +109,16 @@ const ReportMissingS = ({ navigation, route }) => {
         }
       );
         const data = await response.json();
+         console.log('Raw Data from Backend:', data);
         const convertedData = data.map(item => ({
   ...item,
   dateLost: item.dateLost ? new Date(item.dateLost) : new Date(), // Parse date string
   timeApproximate: item.timeApproximate ? new Date(`1970-01-01T${item.timeApproximate}Z`) : new Date(), // Convert time string to Date
-  dateSubmitted: new Date(item.dateSubmitted)
+  dateSubmitted: item.dateSubmitted ? new Date(item.dateSubmitted) : new Date() // **Ensure it's parsed if it exists**
+
 }));
         
         setReports(convertedData);
-        setReports(data);
       } catch (err) {
         setError(err.message);
         Alert.alert('Error', 'Failed to load reports');
@@ -75,33 +132,39 @@ const ReportMissingS = ({ navigation, route }) => {
     }
   }, [showForm]);
 
-  const ReportItem = ({ item, index }) => (
-    <Card style={styles.reportItem}>
+  const ReportItem = ({ item, index }) => {
+     console.log('ReportItem - Index:', index, 'Item:', item); // <-- ADD THIS LINE
+    return (
+  <Card style={styles.reportItem}>
       <Card.Content>
         <Text style={styles.reportTitle}>{item.category || 'Uncategorized Item'}</Text>
+        
         <Text>Status: {item.status}</Text>
-        <Text>Submitted: {item.dateSubmitted.toLocaleDateString()}</Text>
+        <Text>Submitted: {item.dateSubmitted ? item.dateSubmitted.toLocaleDateString() : 'Not Available'}</Text>
         <View style={styles.itemActions}>
-        {item.status === 'pending' && (
+        
           <Button 
             mode="contained" 
-            onPress={() => handleMarkAsFound(index)}
+            onPress={() => handleMarkAsFound(item.id)}
             style={styles.foundButton}
             labelStyle={{ color: 'white' }}
           >
             Mark as Found
           </Button>
-        )}
-          <Button mode="contained-tonal" onPress={() => handleEditReport(index)} style={styles.editButton} labelStyle={{ color: 'white' }}>
+        
+          <Button mode="contained-tonal" onPress={() => handleEditReport(item.id)} style={styles.editButton} labelStyle={{ color: 'white' }}>
             Edit
           </Button>
-          <Button mode="outlined" onPress={() => handleDeleteReport(index)} style={styles.deleteButton} labelStyle={{ color: 'white' }}>
+          <Button mode="outlined" onPress={() => handleDeleteReport(item.id)} style={styles.deleteButton} labelStyle={{ color: 'white' }}>
             Delete
           </Button>
         </View>
       </Card.Content>
     </Card>
-  );
+);
+  };
+    
+  
 
   const handleNewReport = () => {
     setCurrentReport({
@@ -121,6 +184,7 @@ const ReportMissingS = ({ navigation, route }) => {
       status: 'pending',
       name,
       email,
+      studentId,
       dateSubmitted: new Date(),
       isEditing: false,
       phoneNumber: '',
@@ -129,34 +193,45 @@ const ReportMissingS = ({ navigation, route }) => {
     setShowForm(true);
   };
 
-  const handleEditReport = (index) => {
-    const reportId = reports[index].id;
+  const handleEditReport = (reportId) => {
     const reportToEdit = reports.find(report => report.id === reportId);
+    
+     const timeApproximate = reportToEdit.timeApproximate || new Date();
+  const parsedTime = new Date(timeApproximate); // Clone the Date
+
     setCurrentReport({
       ...reportToEdit,
       isEditing: true,
-      id: reportId 
+      id: reportId ,
+      photos: reportToEdit.photos || [],
+       dateLost: reportToEdit.dateLost ? new Date(reportToEdit.dateLost) : new Date(), // Convert to Date
+      timeApproximate: parsedTime,
     });
+    console.log("Editing report ID:", reportId);
     setShowForm(true);
   };
 
-  const handleDeleteReport = async (index) => {
-    const id = reports[index].id;
+  const handleDeleteReport = async (reportId) => {
     try {
       const token = await AsyncStorage.getItem('authToken');
+       console.log('Deleting report with ID:', reportId);
+      console.log('Authorization Token:', token);
+      
 
-      const response = await fetch(`${API_URL}/report-missing/my-reports/${id}`, {
+      const response = await fetch(`${API_URL}/report-missing/delete/${reportId}`, {
         method: 'DELETE',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ id: id }),
       });
       
-      if (!response.ok) throw new Error('Failed to delete report');
+      if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Failed to delete report:', errorData);
+      throw new Error(`Failed to delete report: ${errorData?.message || response.statusText}`);
+    }
       
-      const updatedReports = reports.filter((_, i) => i !== index);
+      const updatedReports = reports.filter(report => report.id !== reportId);
       setReports(updatedReports);
     } catch (error) {
       Alert.alert('Error', error.message);
@@ -193,6 +268,7 @@ const ReportMissingS = ({ navigation, route }) => {
 
   const uploadImage = async (imageSource) => {
   try {
+     const token = await AsyncStorage.getItem('authToken');
     let fileType = 'image/jpeg'; 
     let formData = new FormData();
     
@@ -201,11 +277,13 @@ const ReportMissingS = ({ navigation, route }) => {
     } else if (fileType === 'image/gif') {
       fileName = `photo_${Date.now()}.gif`;
     }
-    formData.append('file', { 
+    formData.append('photos', { 
       uri: imageSource,
       name: `photo_${Date.now()}.${fileType.split('/')[1]}`, 
       type: fileType,
     });
+
+       formData.append('photoUrls', JSON.stringify([]));
 
     
     const uploadResponse = await fetch(`${API_URL}/report-missing/create`, {
@@ -213,6 +291,7 @@ const ReportMissingS = ({ navigation, route }) => {
       body: formData,
       headers: {
         'Content-Type': 'multipart/form-data', 
+        'Authorization': `Bearer ${token}`,
       },
     });
 
@@ -278,10 +357,14 @@ const ReportMissingS = ({ navigation, route }) => {
     setIsLoading(true);
     try {
       const token = await AsyncStorage.getItem('authToken');
+      const storedEmail = await AsyncStorage.getItem('email');
       const method = currentReport.isEditing ? 'PUT' : 'POST';
       const url = currentReport.isEditing 
-        ? `${API_URL}/report-missing/create/${currentReport.id}`
+        ? `${API_URL}/report-missing/${currentReport.id}/update`
         : `${API_URL}/report-missing/create`;
+
+         console.log("handleSubmit - isEditing:", currentReport.isEditing, "ID to update:", currentReport.id, "URL:", url); // <--- ADD THIS LINE
+
 
         const uploadedImageUrls = [];
     for (const localUri of currentReport.photos) {
@@ -314,6 +397,7 @@ const ReportMissingS = ({ navigation, route }) => {
       status: currentReport.status,
       name: currentReport.name,
       email: currentReport.email,
+      studentId: currentReport.studentId,
       phoneNumber: currentReport.phoneNumber,
       sharePhone: currentReport.sharePhone,
       ...(currentReport.isEditing && { id: currentReport.id }), // Include id for editing
@@ -329,12 +413,43 @@ const ReportMissingS = ({ navigation, route }) => {
         body: JSON.stringify(payload),
       });
 
-      if (!response.ok) throw new Error('Failed to save report');
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Failed to save report:', errorData);
+        throw new Error(`Failed to save report: ${errorData?.message || response.statusText}`);
+      }
 
-      // Refresh reports after submission
-      const updatedReports = await fetch(`${API_URL}/report-missing/create`).then(res => res.json());
-      setReports(updatedReports);
-      
+      const responseData = await response.json();
+      console.log('Response from save report:', responseData);
+
+// **CRITICAL: Backend should likely return the updated report data**
+        // **Adjust how you update your local state based on the response**
+        if (currentReport.isEditing && responseData?.id) {
+            const updatedReport = { ...payload, id: responseData.id }; // Assuming backend returns the updated ID
+            setReports(prevReports =>
+                prevReports.map(report => (report.id === updatedReport.id ? updatedReport : report))
+            );
+        } else if (!currentReport.isEditing && responseData?.id) {
+            const newReport = { ...payload, id: responseData.id, dateSubmitted: new Date() };
+            setReports(prevReports => [newReport, ...prevReports]);
+            setCurrentReport(prev => ({ ...prev, id: responseData.id }));
+        }
+
+      // Refresh reports after submission/update
+      const updatedReportsResponse = await fetch(`${API_URL}/report-missing/my-reports?email=${storedEmail}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      const updatedReportsData = await updatedReportsResponse.json();
+      const convertedUpdatedReports = updatedReportsData.map(item => ({
+        ...item,
+        dateLost: item.dateLost ? new Date(item.dateLost) : new Date(),
+        timeApproximate: item.timeApproximate ? new Date(`1970-01-01T${item.timeApproximate}Z`) : new Date(),
+        dateSubmitted: new Date(item.dateSubmitted)
+      }));
+      setReports(convertedUpdatedReports);
+
       setShowForm(false);
       Alert.alert('Success', `Report ${currentReport.isEditing ? 'Updated' : 'Submitted'}!`);
     } catch (error) {
@@ -343,24 +458,27 @@ const ReportMissingS = ({ navigation, route }) => {
       setIsLoading(false);
     }
   };
+      
 
-  const handleMarkAsFound = async (index) => {
-    const id = reports[index].id;
+  const handleMarkAsFound = async (reportId) => {
     try {
       const token = await AsyncStorage.getItem('authToken');
-      const response = await fetch(`${API_URL}/report-missing/status/{status}/${id}`, {
+       const storedEmail = await AsyncStorage.getItem('email');
+        const newStatus = 'found'; // Ensure you have the email
+      const response = await fetch(`${API_URL}/report-missing/${reportId}/status?status=${newStatus}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
       },
-        body: JSON.stringify({ status: 'found' }),
+        //body: JSON.stringify({ status: 'found', email:storedEmail }),
       });
 
       if (!response.ok) throw new Error('Failed to update status');
       
-      const updatedReports = [...reports];
-      updatedReports[index].status = 'found';
+      const updatedReports = reports.map(report =>
+        report.id === reportId ? { ...report, status: newStatus } : report
+      );
       setReports(updatedReports);
     } catch (error) {
       Alert.alert('Error', error.message);
@@ -398,9 +516,13 @@ const ReportMissingS = ({ navigation, route }) => {
 
             <Card style={styles.card}>
               <Card.Content>
-              <View style={styles.iconRow}>
-              <Icon source="tag" size={20} color="#666" />
-                <Text style={styles.label}> Item Category : <MandatoryLabel /></Text></View>
+               <View style={styles.iconRow}>
+  <Icon source="tag" size={20} color="#666" />
+  <View style={{ flexDirection: 'row' }}>
+    <Text style={styles.label}>Item Category: </Text>
+    <MandatoryLabel />
+  </View>
+</View>
                 <Picker
                   selectedValue={currentReport.category}
                   onValueChange={value => setCurrentReport(prev => ({ ...prev, category: value }))}
@@ -495,7 +617,8 @@ const ReportMissingS = ({ navigation, route }) => {
                       newDate.getMonth(),
                       newDate.getDate(),
                       currentReport.timeApproximate.getHours(),
-                      currentReport.timeApproximate.getMinutes()
+                      currentReport.timeApproximate.getMinutes(),
+                      currentReport.timeApproximate.getSeconds()
                     );
                     setCurrentReport(prev => ({
                       ...prev,
@@ -520,20 +643,24 @@ const ReportMissingS = ({ navigation, route }) => {
                         currentReport.dateLost.getMonth(),
                         currentReport.dateLost.getDate(),
                         newTime.getHours(),
-                        newTime.getMinutes()
+                        newTime.getMinutes(),
+                         newTime.getSeconds()
                       );
                       setCurrentReport(prev => ({
                         ...prev,
-                        dateLost: mergedDate,
                         timeApproximate: mergedDate
                       }));
                     }}
                      />
                   </View>
-
                   <View style={styles.iconRow}>
-                  <Icon source="map-marker" size={20} color="#666" />
-                <Text style={styles.label}> Location : <MandatoryLabel /></Text></View>
+  <Icon source="map-marker" size={20} color="#666" />
+  <View style={{ flexDirection: 'row' }}>
+    <Text style={styles.label}>Location: </Text>
+    <MandatoryLabel />
+  </View>
+</View>
+
                 <RadioButton.Group
                   value={currentReport.locationType}
                   onValueChange={value => setCurrentReport(prev => ({ ...prev, locationType: value,  station: value === 'bus' ? '' : prev.station,  busNumber: value === 'station' ? '' : prev.busNumber }))}>
@@ -552,9 +679,10 @@ const ReportMissingS = ({ navigation, route }) => {
                     <Picker.Item label="Select Station" value="" />
                     <Picker.Item label="North Amman Bus Station" value="North Amman Bus Station" />
                     <Picker.Item label="South bus station" value="South bus station" />
-                    <Picker.Item label="Raghadan" value="Ragadan" />
+                    <Picker.Item label="Raghadan" value="Raghadan" />
                     <Picker.Item label="Shafa badran" value="Shafa badran" />
                     <Picker.Item label="Sweileh" value="Sweileh" />
+                      <Picker.Item label="Zarqa Station" value="Zarqa Station" />
                   </Picker>
                 ) : (
                   <TextInput
@@ -638,6 +766,7 @@ const ReportMissingS = ({ navigation, route }) => {
                   <Button 
                     mode="contained" 
                     onPress={handleSubmit}
+                    loading={isLoading}
                     style={styles.submitButton}
                   >
                     {currentReport.isEditing ? 'Update Report' : 'Submit Report'}
@@ -661,7 +790,7 @@ const ReportMissingS = ({ navigation, route }) => {
                 <Text style={styles.infoText}>
                   - Tap + to create a new report{'\n'}
                   - You'll be notified when:{'\n'}
-                  • An operator/driver finds your item{'\n'}
+                  • An operator finds your item{'\n'}
                   • Your report approaches 30 days old{'\n'}
                   - Update status if found or delete report{'\n'}
                   - If you find an item that is not yours, please hand it over to the nearest station operator.
@@ -676,15 +805,15 @@ const ReportMissingS = ({ navigation, route }) => {
                      Your Submitted Reports:
                 </Text>
 
-            <FlatList
-              data={reports}
-              renderItem={({ item, index }) => <ReportItem item={item} index={index} />}
-              keyExtractor={(item, index) => index.toString()}
-              ListEmptyComponent={
-                <Text style={styles.emptyText}>No reports submitted yet</Text>
-              }
-              scrollEnabled={false}
-            />
+           <FlatList
+  data={reports}
+  renderItem={({ item, index }) => <ReportItem item={item} index={index} />}
+  keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
+  ListEmptyComponent={
+    <Text style={styles.emptyText}>No reports submitted yet</Text>
+  }
+  scrollEnabled={false}
+/>
 
             <FAB
               style={styles.fab}

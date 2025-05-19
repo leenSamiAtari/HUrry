@@ -1,10 +1,33 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 const Home = ({ navigation, route }) => {
   const { role } = route.params; // Role passed from the sign-in page
    const { token } = route.params;
+   const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [studentId, setStudentId] = useState("");
+
+useEffect(() => {
+  console.log('Route params in Home:', route.params);
+  setName(route.params?.name || '');
+  setEmail(route.params?.email || '');
+  setStudentId(route.params?.studentId?.toString() || '');
+}, [route.params]);
+
+const loadUserData = async () => {
+    try {
+      const storedName = await AsyncStorage.getItem("name");
+      const storedEmail = await AsyncStorage.getItem("email");
+      const storedStudentId = await AsyncStorage.getItem("studentId");
+      if (storedName) setName(storedName);
+      if (storedEmail) setEmail(storedEmail);
+      if (storedStudentId) setStudentId(storedStudentId);
+    } catch (error) {
+      console.error("Error loading user data from AsyncStorage:", error);
+    }
+  };
 
   const studentMenuItems = [
     {
@@ -21,7 +44,7 @@ const Home = ({ navigation, route }) => {
       title: "Report Missing Items",
       icon: "alert-circle-outline",
       action: () => navigation.navigate("ReportMissingS",{
-        role: 'STUDENT'})
+        role: 'STUDENT',  name, email, studentId })
     },
     {
       title: "View Bus Schedule",
@@ -48,7 +71,7 @@ const Home = ({ navigation, route }) => {
     {
       title: "Missing Items Reports",
       icon: "alert-circle-outline",
-      action: () => navigation.navigate("ReportMissingOD" ,{role}),
+      action: () => navigation.navigate("ReportMissingOD" ,{role: 'OPERATOR', name, email,studentId}),
     },
     {
       title: "Notify Students",
@@ -124,7 +147,7 @@ const Home = ({ navigation, route }) => {
           </TouchableOpacity>
         </View>
       </View>
-<Text style={styles.header}>{getTimeBasedGreeting()}, <Text style={styles.role}>{formatRole(role)}</Text>!</Text>
+<Text style={styles.header}>{getTimeBasedGreeting()}, <Text style={styles.role}>{name} </Text>!</Text>
 <Text style={styles.subHeader}>How can we assist you today?</Text>
 
       <View style={styles.menu}>

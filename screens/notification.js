@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TextInput, Button, FlatList, StyleSheet, TouchableOpacity, Alert, ActivityIndicator,Keyboard,TouchableWithoutFeedback,ScrollView } from 'react-native';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../config/Constants';
 
 const notification = ({ route, navigation }) => {
     const { role: userRole } = route.params;
@@ -16,10 +17,10 @@ const notification = ({ route, navigation }) => {
 
     const API_URLS = {
         OPERATOR: {
-            SEND: 'https://c54e-91-186-230-143.ngrok-free.app/announcements/create',
+            SEND: `${API_URL}/announcements/create`,
         },
         OTHERS: {
-            GET: 'https://c54e-91-186-230-143.ngrok-free.app/announcements/view'
+            GET: `${API_URL}/announcements/view`
         }
     };
 
@@ -230,7 +231,7 @@ const notification = ({ route, navigation }) => {
                     showsVerticalScrollIndicator={true}
       >
 
-            <Text style={styles.title}>Notifications {userRole}</Text>
+            <Text style={styles.title}>Notifications </Text>
 
             {loading && <ActivityIndicator size="large" color="#59B3F8" />}
 

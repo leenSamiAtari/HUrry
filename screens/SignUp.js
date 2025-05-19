@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { View,TouchableOpacity, Text,ImageBackground, TextInput, Button, StyleSheet,Alert, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform, ScrollView } from "react-native";
 import { MaterialIcons, FontAwesome, Ionicons } from "@expo/vector-icons";
-
-const API_URL = "https://c54e-91-186-230-143.ngrok-free.app";
+import { API_URL } from '../config/Constants';
 
 const SignUp = ({ route, navigation }) => {
   const { role } = route.params; // Role passed from the welcome page
@@ -52,15 +51,33 @@ const SignUp = ({ route, navigation }) => {
       if (contentType && contentType.includes("application/json")) {
         const data = await response.json();
         Alert.alert("Sign-Up Successful", data.message);
-      } else {
+        if (data.user) {
+          const { name, email, studentId } = data.user;
+          // Store user data in AsyncStorage
+          await AsyncStorage.setItem("name", name);
+          await AsyncStorage.setItem("email", email);
+          if (studentId) {
+            await AsyncStorage.setItem("studentId", studentId.toString());
+          }
+          // Navigate to the sign-in screen with the data
+          navigation.navigate("SignIn", { role, name, email, studentId });
+        } else {
+          navigation.navigate("SignIn", { role, name: formData.name, email: formData.email });
+        }
+      }
+
+      else {
         const message = await response.text();
         Alert.alert("Sign-Up Successful", message);
+        // Navigate to sign-in without user details as they are not in the response
+        navigation.navigate("SignIn", { role, name: formData.name, email: formData.email });
       }
-  
-      navigation.navigate("SignIn",{role, name:formData.name});
     } catch (error) {
       console.error("Error during sign-up:", error.message);
+      setError(error.message);
       Alert.alert("Sign-Up Failed", error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
